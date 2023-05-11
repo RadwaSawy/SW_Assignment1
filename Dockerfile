@@ -10,6 +10,9 @@ COPY requirements.txt .
 # Install any dependencies specified in requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
+# Install pytest
+RUN pip install pytest
+
 # Copy the application code into the container
 COPY math_ops.py /app/
 COPY test_math_ops.py /app/
