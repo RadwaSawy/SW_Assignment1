@@ -14,7 +14,7 @@ steps:
   displayName: 'Build Docker image'
 
 - script: |
-    docker run my-python-app python myscript.py
+    docker run my-python-app python math_ops.py
   displayName: 'Run Python script'
 
 - script: |
@@ -25,5 +25,5 @@ steps:
   displayName: 'Install dependencies'
 
 - script: |
-    python -m pytest test_myscript.py
+    python -m pytest test_math_ops.py
   displayName: 'Run unit tests'
