@@ -18,11 +18,11 @@ steps:
   displayName: 'Run Python script'
 
 - script: |
-    python -m venv env
-    source env/bin/activate
-    pip install --upgrade pip
-    pip install -r requirements.txt
-    pip install pytest
+     python -m venv env
+     source env/bin/activate
+     /usr/bin/python -m pip install --upgrade pip
+     /usr/bin/python -m pip install -r requirements.txt
+     /usr/bin/python -m pip install pytest
   displayName: 'Install dependencies'
 
 - script: |
