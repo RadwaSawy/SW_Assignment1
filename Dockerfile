@@ -11,8 +11,7 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy the application code into the container
-COPY math_ops.py . /app/
-COPY test_math_ops.py . /app/
+COPY math_ops.py test_math_ops.py /app/
 
 # Set the command to run the unit tests
 CMD [ "pytest" ,  "test_math_ops.py"]
