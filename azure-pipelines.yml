@@ -1,0 +1,29 @@
+# Docker
+# Build a Docker image
+# https://docs.microsoft.com/azure/devops/pipelines/languages/docker
+
+trigger:
+- master
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+steps:
+- script: |
+    docker build -t my-python-app .
+  displayName: 'Build Docker image'
+
+- script: |
+    docker run my-python-app python myscript.py
+  displayName: 'Run Python script'
+
+- script: |
+    python -m venv env
+    source env/bin/activate
+    pip install --upgrade pip
+    pip install -r requirements.txt
+  displayName: 'Install dependencies'
+
+- script: |
+    python -m pytest test_myscript.py
+  displayName: 'Run unit tests'
