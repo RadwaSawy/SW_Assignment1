@@ -22,9 +22,10 @@ steps:
      source env/bin/activate
      /usr/bin/python -m pip install --upgrade pip
      /usr/bin/python -m pip install -r requirements.txt
-     /usr/bin/python -m pip install pytest
+     /usr/bin/python -m pip install pytest coverage
   displayName: 'Install dependencies'
 
 - script: |
-    python -m pytest test_math_ops.py
-  displayName: 'Run unit tests'
+    python -m coverage run --source=. -m pytest test_math_ops.py
+    python -m coverage report -m
+  displayName: 'Run unit tests with coverage'
