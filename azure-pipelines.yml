@@ -43,7 +43,7 @@ steps:
 
 - task: AzureCLI@2
   inputs:
-    azureSubscription: 'Azure for Students'
+    azureSubscription: 'MyServiceConnection'
     scriptType: 'bash'
     scriptLocation: 'inlineScript'
     inlineScript: |
