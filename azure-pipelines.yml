@@ -109,11 +109,4 @@ stages:
               inlineScript: |
                 # Deploy to production environment
                 # ...
-          - task: PowerShell@2
-            inputs:
-              targetType: 'inline'
-              pwsh: false
-              script: |
-                $approval = &$env:SystemRoot\System32\WindowsPowerShell\v1.0\powershell.exe -NoProfile -NonInteractive -Command { Read-Host "Do you want to approve the deployment to production? (Y/N)" }
-                if ($approval -ne 'Y') { throw "Deployment approval was not granted." }
     timeoutInMinutes: 1440 # 24 hours
