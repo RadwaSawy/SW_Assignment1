@@ -1,7 +1,3 @@
-# Docker
-# Build a Docker image
-# https://docs.microsoft.com/azure/devops/pipelines/languages/docker
-
 trigger:
 - master
 
@@ -40,6 +36,19 @@ steps:
       $(containerTag)
       latest
   displayName: 'Push Docker image'
+
+- task: Bash@3
+  inputs:
+    targettype: 'inline'
+    script: 'pytest automated_test.py --junitxml=test_results.xml'
+  displayName: 'Run acceptance tests'
+
+- task: PublishTestResults@2
+  inputs:
+    testResultsFormat: 'JUnit'
+    testResultsFiles: '**/test_results.xml'
+    failTaskOnFailedTests: true
+  displayName: 'Publish acceptance test results'
 
 - task: AzureCLI@2
   inputs:
