@@ -8,24 +8,44 @@ trigger:
 pool:
   vmImage: 'ubuntu-latest'
 
+variables:
+  # Container registry information
+  containerRegistry: 'MyContainer23Registry'
+  containerRepository: 'SW_Assignment1'
+  containerTag: '$(Build.BuildId)'
+  containerImageName: '$(containerRegistry)/$(containerRepository):$(containerTag)'
+  # ACI information
+  aciResourceGroup: 'MyResourceGroup'
+  aciName: 'mycontainerinstance'
+  aciRegion: 'West US'
+
 steps:
-- script: |
-    docker build -t my-python-app .
+- task: Docker@2
+  inputs:
+    containerRegistry: '$(containerRegistry)'
+    repository: '$(containerRepository)'
+    command: 'build'
+    Dockerfile: '**/Dockerfile'
+    tags: |
+      $(containerTag)
+      latest
   displayName: 'Build Docker image'
 
-- script: |
-    docker run my-python-app python math_ops.py
-  displayName: 'Run Python script'
+- task: Docker@2
+  inputs:
+    containerRegistry: '$(containerRegistry)'
+    repository: '$(containerRepository)'
+    command: 'push'
+    tags: |
+      $(containerTag)
+      latest
+  displayName: 'Push Docker image'
 
-- script: |
-     python -m venv env
-     source env/bin/activate
-     /usr/bin/python -m pip install --upgrade pip
-     /usr/bin/python -m pip install -r requirements.txt
-     /usr/bin/python -m pip install pytest coverage
-  displayName: 'Install dependencies'
-
-- script: |
-    python -m coverage run --source=. -m pytest test_math_ops.py
-    python -m coverage report -m
-  displayName: 'Run unit tests with coverage'
+- task: AzureCLI@2
+  inputs:
+    azureSubscription: 'My Azure Subscription'
+    scriptType: 'bash'
+    scriptLocation: 'inlineScript'
+    inlineScript: |
+      az container start --resource-group $(aciResourceGroup) --name $(aciName)
+  displayName: 'Start Azure Container Instance'
