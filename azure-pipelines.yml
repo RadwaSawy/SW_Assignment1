@@ -48,7 +48,7 @@ steps:
 - task: Bash@3
   inputs:
     targettype: 'inline'
-    script: 'pytest automated_test.py --junitxml=test_results.xml'
+    script: 'pytest -v automated_test.py --junitxml=test_results.xml'
   displayName: 'Run acceptance tests'
 
 - task: PublishTestResults@2
