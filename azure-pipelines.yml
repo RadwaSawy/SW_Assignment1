@@ -112,8 +112,9 @@ stages:
           - task: PowerShell@2
             inputs:
               targetType: 'inline'
+              pwsh: false
               script: |
-                [System.Reflection.Assembly]::LoadWithPartialName("System.Windows.Forms")
-                [System.Windows.Forms.MessageBox]::Show("Do you want to approve the deployment to production?", "Manual Approval", [System.Windows.Forms.MessageBoxButtons]::YesNo) | Out-Null
-                if ($LASTEXITCODE -ne 6) { throw "Deployment approval was not granted." }
+                Add-Type -AssemblyName System.Windows.Forms
+                $result = [System.Windows.Forms.MessageBox]::Show("Do you want to approve the deployment to production?", "Manual Approval", [System.Windows.Forms.MessageBoxButtons]::YesNo)
+                if ($result -ne [System.Windows.Forms.DialogResult]::Yes) { throw "Deployment approval was not granted." }
     timeoutInMinutes: 1440 # 24 hours
