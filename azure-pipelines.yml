@@ -97,6 +97,8 @@ stages:
     environment:
       name: 'Production'
       resourceType: 'VirtualMachine'
+      resourceName: 'MyVirtualMachine'  
+    
     strategy:
       runOnce:
         deploy:
