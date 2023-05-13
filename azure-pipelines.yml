@@ -15,54 +15,102 @@ variables:
   aciName: 'mycontainerinstance'
   aciRegion: 'West US'
 
-steps:
-- task: Docker@2
-  inputs:
-    containerRegistry: '$(containerRegistry)'
-    repository: '$(containerRepository)'
-    command: 'build'
-    Dockerfile: '**/Dockerfile'
-    tags: |
-      $(containerTag)
-      latest
-  displayName: 'Build Docker image'
+stages:
+- stage: BuildAndTest
+  displayName: 'Build and Test'
+  jobs:
+  - job: BuildAndTest
+    displayName: 'Build and Test'
+    steps:
+    - task: Docker@2
+      inputs:
+        containerRegistry: '$(containerRegistry)'
+        repository: '$(containerRepository)'
+        command: 'build'
+        Dockerfile: '**/Dockerfile'
+        tags: |
+          $(containerTag)
+          latest
+      displayName: 'Build Docker image'
 
-- task: Docker@2
-  inputs:
-    containerRegistry: '$(containerRegistry)'
-    repository: '$(containerRepository)'
-    command: 'push'
-    tags: |
-      $(containerTag)
-      latest
-  displayName: 'Push Docker image'
+    - task: Docker@2
+      inputs:
+        containerRegistry: '$(containerRegistry)'
+        repository: '$(containerRepository)'
+        command: 'push'
+        tags: |
+          $(containerTag)
+          latest
+      displayName: 'Push Docker image'
 
-- script: |
-     python -m venv env
-     source env/bin/activate
-     /usr/bin/python -m pip install --upgrade pip
-     /usr/bin/python -m pip install -r requirements.txt
-     /usr/bin/python -m pip install pytest
-  displayName: 'Install dependencies'
+    - script: |
+         python -m venv env
+         source env/bin/activate
+         /usr/bin/python -m pip install --upgrade pip
+         /usr/bin/python -m pip install -r requirements.txt
+         /usr/bin/python -m pip install pytest
+      displayName: 'Install dependencies'
 
-- task: Bash@3
-  inputs:
-    targettype: 'inline'
-    script: 'pytest -v test_add_numbers.py --junitxml=test_results.xml'
-  displayName: 'Run acceptance tests'
+    - task: Bash@3
+      inputs:
+        targettype: 'inline'
+        script: 'pytest -v test_add_numbers.py --junitxml=test_results.xml'
+      displayName: 'Run acceptance tests'
 
-- task: PublishTestResults@2
-  inputs:
-    testResultsFormat: 'JUnit'
-    testResultsFiles: '**/test_results.xml'
-    failTaskOnFailedTests: true
-  displayName: 'Publish acceptance test results'
+    - task: PublishTestResults@2
+      inputs:
+        testResultsFormat: 'JUnit'
+        testResultsFiles: '**/test_results.xml'
+        failTaskOnFailedTests: true
+      displayName: 'Publish acceptance test results'
 
-- task: AzureCLI@2
-  inputs:
-    azureSubscription: 'MyServiceConnection'
-    scriptType: 'bash'
-    scriptLocation: 'inlineScript'
-    inlineScript: |
-      az container start --resource-group $(aciResourceGroup) --name $(aciName)
-  displayName: 'Start Azure Container Instance'
+- stage: DeployToStaging
+  displayName: 'Deploy to Staging'
+  dependsOn: BuildAndTest
+  condition: succeeded()
+  jobs:
+  - deployment: DeployToStaging
+    displayName: 'Deploy to Staging'
+    environment:
+      name: 'Staging'
+      resourceType: 'VirtualMachine'
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - task: AzureCLI@2
+            inputs:
+              azureSubscription: 'MyServiceConnection'
+              scriptType: 'bash'
+              scriptLocation: 'inlineScript'
+              inlineScript: |
+                # Deploy to staging environment
+                # ...
+
+- stage: DeployToProduction
+  displayName: 'Deploy to Production'
+  dependsOn: DeployToStaging
+  condition: succeeded()
+  jobs:
+  - deployment: DeployToProduction
+    displayName: 'Deploy to Production'
+    environment:
+      name: 'Production'
+      resourceType: 'VirtualMachine'
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - task: AzureCLI@2
+            inputs:
+              azureSubscription: 'MyServiceConnection'
+              scriptType: 'bash'
+              scriptLocation: 'inlineScript'
+              inlineScript: |
+                # Deploy to production environment
+                # ...
+          - task: ManualIntervention@1
+            inputs:
+              instructions: 'Review and approve the deployment to production.'
+              failOnReject: true
+    timeoutInMinutes: 1440 # 24 hours
