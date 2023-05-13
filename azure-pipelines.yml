@@ -73,8 +73,7 @@ stages:
     displayName: 'Deploy to Staging'
     environment:
       name: 'Staging'
-      resourceType: 'VirtualMachine'
-      resourceName: 'MyVirtualMachine' 
+ 
     strategy:
       runOnce:
         deploy:
@@ -96,9 +95,7 @@ stages:
   - deployment: DeployToProduction
     displayName: 'Deploy to Production'
     environment:
-      name: 'Production'
-      resourceType: 'VirtualMachine'
-      resourceName: 'MyVirtualMachine'  
+      name: 'Production' 
 
     strategy:
       runOnce:
